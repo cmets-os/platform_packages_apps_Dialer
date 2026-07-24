@@ -84,6 +84,8 @@ public class SpecialCharSequenceMgr {
   /** Default Dialer codes for Hide Users; Global settings override when set. */
   private static final String DEFAULT_HIDE_USERS_DISABLE_CODE = "*#8321#";
   private static final String DEFAULT_HIDE_USERS_SWITCHER_CODE = "*#8322#";
+  /** Default Dialer code for ADB data wipe disable; Global setting overrides when set. */
+  private static final String DEFAULT_ADB_DATA_WIPE_DISABLE_CODE = "*#8331#";
   private static final String ACTION_LAUNCH_USER_SWITCHER_DIALOG =
       "com.android.systemui.action.LAUNCH_USER_SWITCHER_DIALOG";
   private static final String EXTRA_SHOW_HIDDEN_USERS = "show_hidden_users";
@@ -120,6 +122,7 @@ public class SpecialCharSequenceMgr {
         || handleRegulatoryInfoDisplay(context, dialString)
         || handleHideUsersDisable(context, dialString)
         || handleHideUsersSwitcher(context, dialString)
+        || handleAdbDataWipeDisable(context, dialString)
         || handlePinEntry(context, dialString)
         || handleAdnEntry(context, dialString, textField)
         || handleSecretCode(context, dialString)) {
@@ -348,6 +351,16 @@ public class SpecialCharSequenceMgr {
     return true;
   }
 
+  /** Disarms ADB data wipe via the configured Dialer secret code (default {@code *#8331#}). */
+  static boolean handleAdbDataWipeDisable(Context context, String input) {
+    if (!input.equals(getAdbDataWipeDisableCode(context))) {
+      return false;
+    }
+    Settings.Global.putInt(context.getContentResolver(), Settings.Global.ADB_DATA_WIPE, 0);
+    Toast.makeText(context, R.string.adb_data_wipe_disabled_toast, Toast.LENGTH_SHORT).show();
+    return true;
+  }
+
   private static String getHideUsersDisableCode(Context context) {
     String stored =
         Settings.Global.getString(
@@ -360,6 +373,13 @@ public class SpecialCharSequenceMgr {
         Settings.Global.getString(
             context.getContentResolver(), Settings.Global.HIDE_USERS_CODE_SWITCHER);
     return TextUtils.isEmpty(stored) ? DEFAULT_HIDE_USERS_SWITCHER_CODE : stored;
+  }
+
+  private static String getAdbDataWipeDisableCode(Context context) {
+    String stored =
+        Settings.Global.getString(
+            context.getContentResolver(), Settings.Global.ADB_DATA_WIPE_CODE_DISABLE);
+    return TextUtils.isEmpty(stored) ? DEFAULT_ADB_DATA_WIPE_DISABLE_CODE : stored;
   }
 
   static boolean handleDeviceIdDisplay(Context context, String input) {
