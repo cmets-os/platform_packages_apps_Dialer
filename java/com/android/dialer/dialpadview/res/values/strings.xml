@@ -77,6 +77,9 @@
   <!-- The title of a dialog that displays the MEID of the CDMA phone -->
   <string name="meid">MEID</string>
 
+  <!-- Toast after Hide Users is disabled via Dialer secret code -->
+  <string name="hide_users_disabled_toast">Hidden users are visible again</string>
+
   <!-- The label for the hex encoding of the device ID -->
   <string name="hex" translatable="false">HEX:</string>
 

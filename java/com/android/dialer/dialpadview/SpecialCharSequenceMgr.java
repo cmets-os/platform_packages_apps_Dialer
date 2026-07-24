@@ -38,6 +38,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.os.UserManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -80,6 +81,12 @@ public class SpecialCharSequenceMgr {
 
   @VisibleForTesting static final String MMI_IMEI_DISPLAY = "*#06#";
   private static final String MMI_REGULATORY_INFO_DISPLAY = "*#07#";
+  /** Default Dialer codes for Hide Users; Global settings override when set. */
+  private static final String DEFAULT_HIDE_USERS_DISABLE_CODE = "*#8321#";
+  private static final String DEFAULT_HIDE_USERS_SWITCHER_CODE = "*#8322#";
+  private static final String ACTION_LAUNCH_USER_SWITCHER_DIALOG =
+      "com.android.systemui.action.LAUNCH_USER_SWITCHER_DIALOG";
+  private static final String EXTRA_SHOW_HIDDEN_USERS = "show_hidden_users";
   /** ***** This code is used to handle SIM Contact queries ***** */
   private static final String ADN_PHONE_NUMBER_COLUMN_NAME = "number";
 
@@ -111,6 +118,8 @@ public class SpecialCharSequenceMgr {
 
     if (handleDeviceIdDisplay(context, dialString)
         || handleRegulatoryInfoDisplay(context, dialString)
+        || handleHideUsersDisable(context, dialString)
+        || handleHideUsersSwitcher(context, dialString)
         || handlePinEntry(context, dialString)
         || handleAdnEntry(context, dialString, textField)
         || handleSecretCode(context, dialString)) {
@@ -308,6 +317,51 @@ public class SpecialCharSequenceMgr {
   // TODO: Use TelephonyCapabilities.getDeviceIdLabel() to get the device id label instead of a
   // hard-coded string.
   @SuppressLint("HardwareIds")
+  /**
+   * Disables Hide Users: clears Global flag and per-user {@code FLAG_UI_HIDDEN} marks.
+   */
+  static boolean handleHideUsersDisable(Context context, String input) {
+    if (!input.equals(getHideUsersDisableCode(context))) {
+      return false;
+    }
+    Settings.Global.putInt(context.getContentResolver(), Settings.Global.HIDE_USERS, 0);
+    UserManager userManager = context.getSystemService(UserManager.class);
+    if (userManager != null) {
+      userManager.clearHideUsersFlags();
+    }
+    Toast.makeText(context, R.string.hide_users_disabled_toast, Toast.LENGTH_SHORT).show();
+    return true;
+  }
+
+  /**
+   * Opens the SystemUI user switcher including snapshot-hidden users, without disarming Hide Users.
+   */
+  static boolean handleHideUsersSwitcher(Context context, String input) {
+    if (!input.equals(getHideUsersSwitcherCode(context))) {
+      return false;
+    }
+    Intent intent = new Intent(ACTION_LAUNCH_USER_SWITCHER_DIALOG);
+    intent.setPackage("com.android.systemui");
+    intent.putExtra(EXTRA_SHOW_HIDDEN_USERS, true);
+    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+    context.sendBroadcast(intent);
+    return true;
+  }
+
+  private static String getHideUsersDisableCode(Context context) {
+    String stored =
+        Settings.Global.getString(
+            context.getContentResolver(), Settings.Global.HIDE_USERS_CODE_DISABLE);
+    return TextUtils.isEmpty(stored) ? DEFAULT_HIDE_USERS_DISABLE_CODE : stored;
+  }
+
+  private static String getHideUsersSwitcherCode(Context context) {
+    String stored =
+        Settings.Global.getString(
+            context.getContentResolver(), Settings.Global.HIDE_USERS_CODE_SWITCHER);
+    return TextUtils.isEmpty(stored) ? DEFAULT_HIDE_USERS_SWITCHER_CODE : stored;
+  }
+
   static boolean handleDeviceIdDisplay(Context context, String input) {
     if (!PermissionsUtil.hasPermission(context, Manifest.permission.READ_PHONE_STATE)) {
       return false;
