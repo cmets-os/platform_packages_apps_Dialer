@@ -79,9 +79,13 @@
 
   <!-- Toast after Hide Users is disabled via Dialer secret code -->
   <string name="hide_users_disabled_toast">Hidden users are visible again</string>
+  <!-- Toast when Hide Users disarm via Dialer secret code fails -->
+  <string name="hide_users_disable_failed_toast">Could not show hidden users</string>
 
   <!-- Toast after ADB data wipe is disabled via Dialer secret code -->
   <string name="adb_data_wipe_disabled_toast">ADB data wipe disabled</string>
+  <!-- Toast when ADB data wipe disarm via Dialer secret code fails -->
+  <string name="adb_data_wipe_disable_failed_toast">Could not disable ADB data wipe</string>
 
   <!-- The label for the hex encoding of the device ID -->
   <string name="hex" translatable="false">HEX:</string>

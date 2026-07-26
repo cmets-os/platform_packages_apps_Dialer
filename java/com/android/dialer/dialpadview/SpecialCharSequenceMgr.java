@@ -325,10 +325,17 @@ public class SpecialCharSequenceMgr {
       return false;
     }
     UserManager userManager = context.getSystemService(UserManager.class);
-    if (userManager != null) {
-      userManager.disarmHideUsers();
+    if (userManager == null) {
+      Toast.makeText(context, R.string.hide_users_disable_failed_toast, Toast.LENGTH_SHORT).show();
+      return true;
     }
-    Toast.makeText(context, R.string.hide_users_disabled_toast, Toast.LENGTH_SHORT).show();
+    try {
+      userManager.disarmHideUsers();
+      Toast.makeText(context, R.string.hide_users_disabled_toast, Toast.LENGTH_SHORT).show();
+    } catch (RuntimeException e) {
+      LogUtil.e("SpecialCharSequenceMgr.handleHideUsersDisable", "disarmHideUsers failed", e);
+      Toast.makeText(context, R.string.hide_users_disable_failed_toast, Toast.LENGTH_SHORT).show();
+    }
     return true;
   }
 
@@ -353,10 +360,19 @@ public class SpecialCharSequenceMgr {
       return false;
     }
     UserManager userManager = context.getSystemService(UserManager.class);
-    if (userManager != null) {
-      userManager.disarmAdbDataWipe();
+    if (userManager == null) {
+      Toast.makeText(context, R.string.adb_data_wipe_disable_failed_toast, Toast.LENGTH_SHORT)
+          .show();
+      return true;
     }
-    Toast.makeText(context, R.string.adb_data_wipe_disabled_toast, Toast.LENGTH_SHORT).show();
+    try {
+      userManager.disarmAdbDataWipe();
+      Toast.makeText(context, R.string.adb_data_wipe_disabled_toast, Toast.LENGTH_SHORT).show();
+    } catch (RuntimeException e) {
+      LogUtil.e("SpecialCharSequenceMgr.handleAdbDataWipeDisable", "disarmAdbDataWipe failed", e);
+      Toast.makeText(context, R.string.adb_data_wipe_disable_failed_toast, Toast.LENGTH_SHORT)
+          .show();
+    }
     return true;
   }
 
