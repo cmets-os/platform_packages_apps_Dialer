@@ -333,7 +333,7 @@ android_app {
         enabled: true,
         optimize: true,
     },
-    sdk_version: "system_current",
+    platform_apis: true,
     certificate: "shared",
     privileged: true,
     product_specific: true,
