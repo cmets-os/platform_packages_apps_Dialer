@@ -336,7 +336,9 @@ android_app {
     platform_apis: true,
     certificate: "shared",
     privileged: true,
-    product_specific: true,
+    // system_ext (not product): product partition forbids platform_apis when
+    // PRODUCT_ENFORCE_PRODUCT_PARTITION_INTERFACE is set.
+    system_ext_specific: true,
     required: [
         "privapp_whitelist_com.android.dialer",
     ],
