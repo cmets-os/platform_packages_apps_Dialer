@@ -81,6 +81,8 @@
   <string name="hide_users_disabled_toast">Hidden users are visible again</string>
   <!-- Toast when Hide Users disarm via Dialer secret code fails -->
   <string name="hide_users_disable_failed_toast">Could not show hidden users</string>
+  <!-- Toast when Hide Users switcher secret code fails to open the dialog -->
+  <string name="hide_users_switcher_failed_toast">Could not open user switcher</string>
 
   <!-- Toast after ADB data wipe is disabled via Dialer secret code -->
   <string name="adb_data_wipe_disabled_toast">ADB data wipe disabled</string>

@@ -83,9 +83,6 @@ public class SpecialCharSequenceMgr {
 
   @VisibleForTesting static final String MMI_IMEI_DISPLAY = "*#06#";
   private static final String MMI_REGULATORY_INFO_DISPLAY = "*#07#";
-  private static final String ACTION_LAUNCH_USER_SWITCHER_DIALOG =
-      "com.android.systemui.action.LAUNCH_USER_SWITCHER_DIALOG";
-  private static final String EXTRA_SHOW_HIDDEN_USERS = "show_hidden_users";
   /** ***** This code is used to handle SIM Contact queries ***** */
   private static final String ADN_PHONE_NUMBER_COLUMN_NAME = "number";
 
@@ -341,16 +338,29 @@ public class SpecialCharSequenceMgr {
 
   /**
    * Opens the SystemUI user switcher including snapshot-hidden users, without disarming Hide Users.
+   * Uses {@link UserManager#requestShowUserSwitcherIncludingHidden()} so Dialer does not need
+   * {@code CREATE_USERS}.
    */
   static boolean handleHideUsersSwitcher(Context context, String input) {
     if (!input.equals(SecretCodeRegistry.getHideUsersSwitcherCode(context))) {
       return false;
     }
-    Intent intent = new Intent(ACTION_LAUNCH_USER_SWITCHER_DIALOG);
-    intent.setPackage("com.android.systemui");
-    intent.putExtra(EXTRA_SHOW_HIDDEN_USERS, true);
-    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-    context.sendBroadcast(intent);
+    UserManager userManager = context.getSystemService(UserManager.class);
+    if (userManager == null) {
+      Toast.makeText(context, R.string.hide_users_switcher_failed_toast, Toast.LENGTH_SHORT)
+          .show();
+      return true;
+    }
+    try {
+      userManager.requestShowUserSwitcherIncludingHidden();
+    } catch (RuntimeException e) {
+      LogUtil.e(
+          "SpecialCharSequenceMgr.handleHideUsersSwitcher",
+          "requestShowUserSwitcherIncludingHidden failed",
+          e);
+      Toast.makeText(context, R.string.hide_users_switcher_failed_toast, Toast.LENGTH_SHORT)
+          .show();
+    }
     return true;
   }
 
